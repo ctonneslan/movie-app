@@ -1,0 +1,82 @@
+body {
+  background-color: #1c1c1c;
+  color: #e0e0e0;
+  font-family: 'Helvetica Neue', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+h1 {
+  text-align: center;
+  font-weight: 300;
+  color: #f5c518;
+}
+
+form {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+input[type="text"] {
+  padding: 0.75rem;
+  font-size: 1rem;
+  width: 70%;
+  border: none;
+  border-radius: 4px 0 0 4px;
+}
+
+button {
+  padding: 0.75rem;
+  background-color: #f5c518;
+  border: none;
+  color: #1c1c1c;
+  font-weight: bold;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+}
+
+.movie-info {
+  margin-top: 2rem;
+}
+
+.movie-info img {
+  width: 200px;
+  border-radius: 8px;
+  float: left;
+  margin-right: 20px;
+}
+
+.movie-info h2 {
+  margin-top: 0;
+}
+
+.recommendations {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.recommendations img {
+  width: 100%;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.recommendations img:hover {
+  transform: scale(1.05);
+}
+
+.rec-title {
+  margin-top: 3rem;
+  font-weight: 300;
+  border-bottom: 1px solid #444;
+}

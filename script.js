@@ -17,6 +17,15 @@ async function fetchGenres() {
   }, {});
 }
 
+function getFavorites() {
+  const favs = localStorage.getItem("favorites");
+  return favs ? JSON.parse(favs) : [];
+}
+
+function saveFavorites(favorites) {
+  localStorage.setItem("favorites", JSON.stringify(favorites));
+}
+
 // Call this once on page load
 fetchGenres();
 
@@ -101,9 +110,24 @@ async function displayMovieInfo(movie, credits = null) {
       </div>
 
       <button onclick="playTrailer(${movie.id})">▶️ Watch Trailer</button>
+      <button id="fav-btn">${
+        isFavorite(movie.id) ? "Remove from Favorites" : "Add to Favorites"
+      }</button>  
     </div>
     <div style="clear: both;"></div>
   `;
+
+  // After innerHTML assignment in displayMovieInfo
+  const favBtn = document.getElementById("fav-btn");
+  favBtn.addEventListener("click", () => {
+    if (isFavorite(movie.id)) {
+      removeFavorite(movie.id);
+      favBtn.textContent = "Add to Favorites";
+    } else {
+      addFavorite(movie);
+      favBtn.textContent = "Remove from Favorites";
+    }
+  });
 }
 
 function displayRecommendations(movies) {
@@ -175,3 +199,60 @@ async function fetchCredits(movieId) {
   const data = await res.json();
   return data;
 }
+
+const favoritesList = document.getElementById("favorites-list");
+
+function renderFavorites() {
+  const favorites = getFavorites();
+  favoritesList.innerHTML = "";
+
+  favorites.forEach((movie) => {
+    const li = document.createElement("li");
+    li.textContent = movie.title;
+    li.title = movie.title;
+
+    // Click to load movie
+    li.addEventListener("click", async () => {
+      const details = await fetchMovieDetails(movie.id);
+      const credits = await fetchCredits(movie.id);
+      displayMovieInfo(details, credits);
+      fetchRecommendations(movie.id);
+    });
+
+    // Remove button
+    const removeBtn = document.createElement("span");
+    removeBtn.textContent = "✕";
+    removeBtn.classList.add("remove-fav");
+    removeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      removeFavorite(movie.id);
+    });
+
+    li.appendChild(removeBtn);
+    favoritesList.appendChild(li);
+  });
+}
+
+function addFavorite(movie) {
+  const favorites = getFavorites();
+
+  if (!favorites.find((fav) => fav.id === movie.id)) {
+    favorites.push({ id: movie.id, title: movie.title });
+    saveFavorites(favorites);
+    renderFavorites();
+  }
+}
+
+function removeFavorite(id) {
+  let favorites = getFavorites();
+  favorites = favorites.filter((fav) => fav.id !== id);
+  saveFavorites(favorites);
+  renderFavorites();
+}
+
+function isFavorite(id) {
+  const favorites = getFavorites();
+  return favorites.some((fav) => fav.id === id);
+}
+
+renderFavorites();

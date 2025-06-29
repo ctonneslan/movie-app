@@ -147,3 +147,43 @@ button {
   list-style-type: disc;
 }
 
+#favorites-container {
+  margin-top: 3rem;
+  background: #222;
+  padding: 1rem;
+  border-radius: 6px;
+}
+
+#favorites-container h2 {
+  color: #f5c518;
+  font-weight: 300;
+  margin-bottom: 1rem;
+}
+
+#favorites-list {
+  list-style: none;
+  padding-left: 0;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+#favorites-list li {
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid #444;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#favorites-list li:hover {
+  background-color: #333;
+}
+
+.remove-fav {
+  color: #f54242;
+  margin-left: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+}
+

@@ -8,6 +8,99 @@ const recommendations = document.getElementById("recommendations");
 
 let genreMap = {};
 
+const suggestionsList = document.getElementById("suggestions");
+let activeSuggestionIndex = -1;
+let currentSuggestions = [];
+
+searchInput.addEventListener("input", async () => {
+  const query = searchInput.value.trim();
+  if (query.length < 2) {
+    clearSuggestions();
+    return;
+  }
+
+  const suggestions = await fetchSuggestions(query);
+  currentSuggestions = suggestions;
+  renderSuggestions(suggestions);
+});
+
+searchInput.addEventListener("keydown", (e) => {
+  if (suggestionsList.childElementCount === 0) return;
+
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    if (activeSuggestionIndex < currentSuggestions.length - 1) {
+      activeSuggestionIndex++;
+      updateActiveSuggestion();
+    }
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    if (activeSuggestionIndex > 0) {
+      activeSuggestionIndex--;
+      updateActiveSuggestion();
+    }
+  } else if (e.key === "Enter") {
+    if (activeSuggestionIndex > -1) {
+      e.preventDefault();
+      selectSuggestion(activeSuggestionIndex);
+    }
+  }
+});
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".search-wrapper")) {
+    clearSuggestions();
+  }
+});
+
+async function fetchSuggestions(query) {
+  const res = await fetch(
+    `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(
+      query
+    )}`
+  );
+  const data = await res.json();
+  return data.results.slice(0, 5);
+}
+
+function renderSuggestions(suggestions) {
+  suggestionsList.innerHTML = "";
+  activeSuggestionIndex = -1;
+
+  suggestions.forEach((movie, index) => {
+    const li = document.createElement("li");
+    li.textContent = `${movie.title} (${new Date(
+      movie.release_date || "2000-01-01"
+    ).getFullYear()})`;
+    li.addEventListener("click", () => selectSuggestion(index));
+    suggestionsList.appendChild(li);
+  });
+}
+
+function clearSuggestions() {
+  suggestionsList.innerHTML = "";
+  activeSuggestionIndex = -1;
+  currentSuggestions = [];
+}
+
+function updateActiveSuggestion() {
+  [...suggestionsList.children].forEach((li, i) => {
+    li.classList.toggle("active", i === activeSuggestionIndex);
+  });
+}
+
+async function selectSuggestion(index) {
+  const movie = currentSuggestions[index];
+  if (!movie) return;
+
+  searchInput.value = movie.title;
+  clearSuggestions();
+
+  const credits = await fetchCredits(movie.id);
+  displayMovieInfo(movie, credits);
+  fetchRecommendations(movie.id);
+}
+
 async function fetchGenres() {
   const res = await fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}`);
   const data = await res.json();

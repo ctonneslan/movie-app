@@ -234,3 +234,32 @@ button {
   color: #1c1c1c;
 }
 
+.movie-list {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+.movie-list::-webkit-scrollbar {
+  height: 8px;
+}
+
+.movie-list::-webkit-scrollbar-thumb {
+  background: #f5c518;
+  border-radius: 4px;
+}
+
+.movie-list img {
+  width: 150px;
+  height: auto;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.movie-list img:hover {
+  transform: scale(1.05);
+}

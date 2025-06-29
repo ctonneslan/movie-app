@@ -348,4 +348,50 @@ function isFavorite(id) {
   return favorites.some((fav) => fav.id === id);
 }
 
+const trendingMoviesContainer = document.getElementById("trending-movies");
+const upcomingMoviesContainer = document.getElementById("upcoming-movies");
+
+async function fetchTrendingMovies() {
+  const res = await fetch(`${BASE_URL}/trending/movie/week?api_key=${API_KEY}`);
+  const data = await res.json();
+  return data.results.slice(0, 10);
+}
+
+async function fetchUpcomingMovies() {
+  const res = await fetch(`${BASE_URL}/movie/upcoming?api_key=${API_KEY}`);
+  const data = await res.json();
+  return data.results.slice(0, 10);
+}
+
+function renderMovieList(movies, container) {
+  container.innerHTML = "";
+  movies.forEach((movie) => {
+    const img = document.createElement("img");
+    img.src = `https://image.tmdb.org/t/p/w200${movie.poster_path}`;
+    img.alt = movie.title;
+    img.title = movie.title;
+
+    img.addEventListener("click", async () => {
+      const details = await fetchMovieDetails(movie.id);
+      const credits = await fetchCredits(movie.id);
+      displayMovieInfo(details, credits);
+      fetchRecommendations(movie.id);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    container.appendChild(img);
+  });
+}
+
+async function initHomePage() {
+  const trending = await fetchTrendingMovies();
+  renderMovieList(trending, trendingMoviesContainer);
+
+  const upcoming = await fetchUpcomingMovies();
+  renderMovieList(upcoming, upcomingMoviesContainer);
+}
+
+// Call on page load
+initHomePage();
+
 renderFavorites();

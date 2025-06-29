@@ -26,7 +26,8 @@ searchForm.addEventListener("submit", async (e) => {
   if (query) {
     const movie = await searchMovie(query);
     if (movie) {
-      displayMovieInfo(movie);
+      const credits = await fetchCredits(movie.id);
+      displayMovieInfo(movie, credits);
       fetchRecommendations(movie.id);
     } else {
       movieInfo.innerHTML = `<p>Movie not found.</p>`;
@@ -58,10 +59,20 @@ async function fetchRecommendations(id) {
   displayRecommendations(data.results);
 }
 
-function displayMovieInfo(movie) {
-  // Determine genre IDs from either genre_ids or genres[]
+async function displayMovieInfo(movie, credits = null) {
   const genreIds =
     movie.genre_ids || (movie.genres ? movie.genres.map((g) => g.id) : []);
+
+  // If credits not passed, fetch them inside here:
+  if (!credits) {
+    credits = await fetchCredits(movie.id);
+  }
+
+  // Extract top 5 cast
+  const topCast = credits.cast.slice(0, 5);
+
+  // Extract director(s) from crew
+  const directors = credits.crew.filter((person) => person.job === "Director");
 
   movieInfo.innerHTML = `
     <img src="https://image.tmdb.org/t/p/w300${movie.poster_path}" alt="${
@@ -76,6 +87,19 @@ function displayMovieInfo(movie) {
       </div>
       <p><strong>Rating:</strong> ${movie.vote_average}/10</p>
       <p>${movie.overview}</p>
+      
+      <div class="cast-crew">
+        <h3>Director${directors.length > 1 ? "s" : ""}:</h3>
+        <p>${directors.map((d) => d.name).join(", ")}</p>
+        
+        <h3>Top Cast:</h3>
+        <ul>
+          ${topCast
+            .map((actor) => `<li>${actor.name} as ${actor.character}</li>`)
+            .join("")}
+        </ul>
+      </div>
+
       <button onclick="playTrailer(${movie.id})">▶️ Watch Trailer</button>
     </div>
     <div style="clear: both;"></div>
@@ -104,7 +128,8 @@ function displayRecommendations(movies) {
 
 async function handleRecClick(id) {
   const movie = await fetchMovieDetails(id);
-  displayMovieInfo(movie);
+  const credits = await fetchCredits(movie.id);
+  displayMovieInfo(movie, credits);
   fetchRecommendations(id);
 }
 
@@ -141,4 +166,12 @@ async function playTrailer(movieId) {
   } else {
     alert("Trailer not available.");
   }
+}
+
+async function fetchCredits(movieId) {
+  const res = await fetch(
+    `${BASE_URL}/movie/${movieId}/credits?api_key=${API_KEY}`
+  );
+  const data = await res.json();
+  return data;
 }

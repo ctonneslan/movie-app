@@ -263,3 +263,45 @@ button {
 .movie-list img:hover {
   transform: scale(1.05);
 }
+
+.movie-actions {
+  margin: 1rem 0;
+}
+
+.user-rating, .user-note {
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+.user-rating label,
+.user-note label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: bold;
+  color: #f5c518;
+}
+
+.stars {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #aaa;
+}
+
+.stars span {
+  margin-right: 5px;
+}
+
+.stars .selected {
+  color: #f5c518;
+}
+
+.user-note textarea {
+  width: 100%;
+  padding: 0.5rem;
+  background: #1c1c1c;
+  border: 1px solid #333;
+  color: #eee;
+  border-radius: 4px;
+  resize: vertical;
+}
+

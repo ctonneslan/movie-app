@@ -202,13 +202,72 @@ async function displayMovieInfo(movie, credits = null) {
         </ul>
       </div>
 
-      <button onclick="playTrailer(${movie.id})">▶️ Watch Trailer</button>
-      <button id="fav-btn">${
-        isFavorite(movie.id) ? "Remove from Favorites" : "Add to Favorites"
-      }</button>  
+      <div class="movie-actions">
+        <button onclick="playTrailer(${movie.id})">▶️ Watch Trailer</button>
+        <button id="fav-btn">${
+          isFavorite(movie.id) ? "Remove from Favorites" : "Add to Favorites"
+        }</button>
+        </div>
+
+        <div class="user-rating">
+        <label for="rating">Your Rating:</label>
+        <div id="star-rating" class="stars"></div>
+        </div>
+
+        <div class="user-note">
+        <label for="note">Your Notes:</label>
+        <textarea id="note" rows="4" placeholder="Write your thoughts here..."></textarea>
+        </div>
+ 
     </div>
     <div style="clear: both;"></div>
   `;
+
+  // Inside displayMovieInfo()
+
+  const saved = getUserReview(movie.id);
+  const noteInput = document.getElementById("note");
+  const starContainer = document.getElementById("star-rating");
+
+  // Restore note if saved
+  if (saved?.note) {
+    noteInput.value = saved.note;
+  }
+
+  // Render saved stars or 0
+  renderStars(saved?.rating || 0);
+
+  // Save note on input
+  noteInput.addEventListener("input", () => {
+    saveUserReview(movie.id, {
+      note: noteInput.value,
+      rating: getCurrentStarRating(),
+    });
+  });
+
+  // Star rendering logic
+  function renderStars(selected = 0) {
+    starContainer.innerHTML = "";
+    for (let i = 1; i <= 5; i++) {
+      const star = document.createElement("span");
+      star.innerHTML = "★";
+      if (i <= selected) star.classList.add("selected");
+
+      star.addEventListener("click", () => {
+        renderStars(i);
+        saveUserReview(movie.id, {
+          note: noteInput.value,
+          rating: i,
+        });
+      });
+
+      starContainer.appendChild(star);
+    }
+  }
+
+  function getCurrentStarRating() {
+    return starContainer.querySelectorAll(".selected").length;
+  }
 
   // After innerHTML assignment in displayMovieInfo
   const favBtn = document.getElementById("fav-btn");
@@ -391,7 +450,17 @@ async function initHomePage() {
   renderMovieList(upcoming, upcomingMoviesContainer);
 }
 
+function getUserReview(id) {
+  const reviews = JSON.parse(localStorage.getItem("reviews") || "{}");
+  return reviews[id];
+}
+
+function saveUserReview(id, review) {
+  const reviews = JSON.parse(localStorage.getItem("reviews") || "{}");
+  reviews[id] = review;
+  localStorage.setItem("reviews", JSON.stringify(reviews));
+}
+
 // Call on page load
 initHomePage();
-
 renderFavorites();

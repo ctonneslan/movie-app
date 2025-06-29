@@ -305,3 +305,40 @@ button {
   resize: vertical;
 }
 
+#journal-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.journal-entry {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: #1a1a1a;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.05);
+}
+
+.journal-entry img {
+  width: 100px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.journal-details {
+  flex: 1;
+}
+
+.journal-stars {
+  color: #f5c518;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.journal-note {
+  color: #ccc;
+  font-style: italic;
+  white-space: pre-line;
+}

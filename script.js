@@ -459,8 +459,42 @@ function saveUserReview(id, review) {
   const reviews = JSON.parse(localStorage.getItem("reviews") || "{}");
   reviews[id] = review;
   localStorage.setItem("reviews", JSON.stringify(reviews));
+  renderJournal();
+}
+
+const journalContainer = document.getElementById("journal-entries");
+
+async function renderJournal() {
+  const reviews = JSON.parse(localStorage.getItem("reviews") || "{}");
+  journalContainer.innerHTML = "";
+
+  const movieIds = Object.keys(reviews);
+  for (let id of movieIds) {
+    const review = reviews[id];
+    const movie = await fetchMovieDetails(id);
+
+    const entry = document.createElement("div");
+    entry.classList.add("journal-entry");
+
+    const stars = "★".repeat(review.rating || 0).padEnd(5, "☆");
+
+    entry.innerHTML = `
+      <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${
+      movie.title
+    }" />
+      <div class="journal-details">
+        <h3>${movie.title} (${new Date(movie.release_date).getFullYear()})</h3>
+        <div class="journal-stars">${stars}</div>
+        <div class="journal-note">${review.note || "No notes yet."}</div>
+      </div>
+    `;
+
+    journalContainer.appendChild(entry);
+  }
 }
 
 // Call on page load
 initHomePage();
 renderFavorites();
+
+renderJournal();

@@ -6,6 +6,20 @@ const searchInput = document.getElementById("search-input");
 const movieInfo = document.getElementById("movie-info");
 const recommendations = document.getElementById("recommendations");
 
+let genreMap = {};
+
+async function fetchGenres() {
+  const res = await fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}`);
+  const data = await res.json();
+  genreMap = data.genres.reduce((acc, genre) => {
+    acc[genre.id] = genre.name;
+    return acc;
+  }, {});
+}
+
+// Call this once on page load
+fetchGenres();
+
 searchForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const query = searchInput.value.trim();
@@ -51,6 +65,11 @@ function displayMovieInfo(movie) {
   } poster" />
     <div>
       <h2>${movie.title} (${new Date(movie.release_date).getFullYear()})</h2>
+      <div class="genre-tags">
+        ${movie.genre_ids
+          .map((id) => `<span class="genre-tag">${genreMap[id]}</span>`)
+          .join("")}
+      </div>
       <p><strong>Rating:</strong> ${movie.vote_average}/10</p>
       <p>${movie.overview}</p>
     </div>

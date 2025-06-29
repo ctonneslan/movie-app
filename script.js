@@ -59,6 +59,10 @@ async function fetchRecommendations(id) {
 }
 
 function displayMovieInfo(movie) {
+  // Determine genre IDs from either genre_ids or genres[]
+  const genreIds =
+    movie.genre_ids || (movie.genres ? movie.genres.map((g) => g.id) : []);
+
   movieInfo.innerHTML = `
     <img src="https://image.tmdb.org/t/p/w300${movie.poster_path}" alt="${
     movie.title
@@ -66,34 +70,75 @@ function displayMovieInfo(movie) {
     <div>
       <h2>${movie.title} (${new Date(movie.release_date).getFullYear()})</h2>
       <div class="genre-tags">
-        ${movie.genre_ids
+        ${genreIds
           .map((id) => `<span class="genre-tag">${genreMap[id]}</span>`)
           .join("")}
       </div>
       <p><strong>Rating:</strong> ${movie.vote_average}/10</p>
       <p>${movie.overview}</p>
+      <button onclick="playTrailer(${movie.id})">▶️ Watch Trailer</button>
     </div>
     <div style="clear: both;"></div>
   `;
 }
 
 function displayRecommendations(movies) {
-  recommendations.innerHTML = movies
-    .slice(0, 8)
-    .map(
-      (movie) => `
-      <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" 
-           alt="${movie.title}" 
-           title="${movie.title}"
-           onclick="handleRecClick(${movie.id})"
-      />
-    `
-    )
-    .join("");
+  recommendations.innerHTML = "";
+
+  movies.slice(0, 8).forEach((movie) => {
+    const img = document.createElement("img");
+    img.src = `https://image.tmdb.org/t/p/w200${movie.poster_path}`;
+    img.alt = movie.title;
+    img.title = movie.title;
+    img.classList.add("rec-poster");
+
+    img.addEventListener("click", async () => {
+      const details = await fetchMovieDetails(movie.id);
+      displayMovieInfo(details);
+      fetchRecommendations(movie.id);
+    });
+
+    recommendations.appendChild(img);
+  });
 }
 
 async function handleRecClick(id) {
   const movie = await fetchMovieDetails(id);
   displayMovieInfo(movie);
   fetchRecommendations(id);
+}
+
+window.handleRecClick = handleRecClick;
+
+const trailerModal = document.getElementById("trailer-modal");
+const trailerFrame = document.getElementById("trailer-frame");
+const closeModal = document.querySelector(".close");
+
+closeModal.onclick = function () {
+  trailerModal.style.display = "none";
+  trailerFrame.src = ""; // stop video
+};
+
+window.onclick = function (event) {
+  if (event.target === trailerModal) {
+    trailerModal.style.display = "none";
+    trailerFrame.src = "";
+  }
+};
+
+async function playTrailer(movieId) {
+  const res = await fetch(
+    `${BASE_URL}/movie/${movieId}/videos?api_key=${API_KEY}`
+  );
+  const data = await res.json();
+  const trailer = data.results.find(
+    (video) => video.type === "Trailer" && video.site === "YouTube"
+  );
+
+  if (trailer) {
+    trailerFrame.src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1`;
+    trailerModal.style.display = "block";
+  } else {
+    alert("Trailer not available.");
+  }
 }
